@@ -591,6 +591,17 @@ bool FCurlHttpRequest::SetupRequest()
 		curl_easy_setopt(EasyHandle, CURLOPT_POSTFIELDS, RequestPayload.GetData());
 		curl_easy_setopt(EasyHandle, CURLOPT_POSTFIELDSIZE, RequestPayload.Num());
 	}
+	else if (Verb == TEXT("PATCH"))
+	{
+		curl_easy_setopt(EasyHandle, CURLOPT_CUSTOMREQUEST, "PATCH");
+
+		// If we don't pass any other Content-Type, RequestPayload is assumed to be URL-encoded by this time
+		// (if we pass, don't check here and trust the request)
+		check(!GetHeader("Content-Type").IsEmpty() || IsURLEncoded(RequestPayload));
+
+		curl_easy_setopt(EasyHandle, CURLOPT_POSTFIELDS, RequestPayload.GetData());
+		curl_easy_setopt(EasyHandle, CURLOPT_POSTFIELDSIZE, RequestPayload.Num());
+	}
 	else
 	{
 		UE_LOG(LogHttp, Fatal, TEXT("Unsupported verb '%s', can be perhaps added with CURLOPT_CUSTOMREQUEST"), *Verb);
